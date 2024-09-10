@@ -59,3 +59,10 @@ function variance(x::Array, ddof=1)::Float64
     x = x ^ 2
     sum(x) / (length(x) - ddof)
 end
+
+
+function std(x::Array)::Float64
+    "Return the standard deviation of Array x"
+    return sqrt(variance(x))
+end
+
