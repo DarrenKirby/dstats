@@ -1,0 +1,5 @@
+These are some statistics utilities and functions written in a few different 
+languages (Python and Julia for now...) which I am writing as an educational
+exercise, both for statistics, and Julia (and others). Do not use these unless
+you know what you are doing. Thay are not garanteed to be correct and/or 
+harmless. Fair warning.
