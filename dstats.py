@@ -4,24 +4,25 @@ import numpy as np
 
 
 def mean(x: Sequence) -> float:
-    " Return the arithmetic mean of sequence x"
+    "Return the arithmetic mean of sequence x"
     x_arr = np.array(x)
     x_sum = np.sum(x)
     return x_sum / x_arr.size
 
 
 def median(x: Union[Sequence, np.ndarray]) -> float:
-    " Return the median value of sequence x"
+    "Return the median value of sequence x"
     x_arr = np.array(x)
     x_arr.sort(kind='mergesort')
     length = x_arr.size
     if length % 2 != 0:
         return x_arr[length//2].item()
-    return ((x_arr[length//2] + x_arr[(length//2)-1]) / 2).item()
+    return ((x_arr[length//2] + x_arr[(length//2)-1]) / 2)
 
 
 def mode(x: Sequence) -> list:
-    """ Return the mode(s) of sequence x
+    """
+    Return the mode(s) of sequence x
 
     The mode may have more than one value, and thus, for consistency
     zero or more modes are returned in a list no matter the length.
@@ -39,7 +40,8 @@ def mode(x: Sequence) -> list:
 
 
 def variance(x: Sequence, ddof=1) -> float:
-    """ Return the variance of sequence x
+    """
+    Return the variance of sequence x
 
     The optional ddof argument is delta degrees of freedom. It defaults
     at 1. Leave at the default for sample variance,
@@ -52,7 +54,8 @@ def variance(x: Sequence, ddof=1) -> float:
 
 
 def std(x: Sequence, ddof: int=1) -> float:
-    """ Return the standard deviation of sequence x
+    """
+    Return the standard deviation of sequence x
 
     The optional ddof argument is delta degrees of freedom. It defaults
     at 1. Leave at the default for sample variance,
@@ -62,12 +65,12 @@ def std(x: Sequence, ddof: int=1) -> float:
 
 
 def fano_factor(x: Sequence) -> float:
-    " Return the Fano factor of sequence x."
+    "Return the Fano factor of sequence x."
     return variance(x, ddof=1) / mean(x)
 
 
 def coefficient_of_variance(x: Sequence) -> float:
-    " Return the coefficient of variance of sequence x."
+    "Return the coefficient of variance of sequence x."
     m = mean(x)
     if m <= 0:
         raise ValueError('Cannot calculate COV of sequence with negative mean')
@@ -75,7 +78,8 @@ def coefficient_of_variance(x: Sequence) -> float:
 
 
 def iqr(x: Sequence) -> list:
-    """ Return the inter-quartile range and quartiles of sequence x.
+    """
+    Return the inter-quartile range and quartiles of sequence x.
 
     The return value is a list with the IQR at indice [0], and each of
     the first, second, and third quartiles respectively. Values may be
@@ -99,7 +103,7 @@ def iqr(x: Sequence) -> list:
 
 
 def corr(x: Sequence, y: Sequence) -> float:
-    " Return the Pearson correlation coefficient for sequences x and y."
+    "Return the Pearson correlation coefficient for sequences x and y."
     x_arr = np.array(x)
     y_arr = np.array(y)
 
@@ -122,7 +126,7 @@ def corr(x: Sequence, y: Sequence) -> float:
 
 
 def skew(x: Sequence) -> float:
-    " Returns the skew aka third moment of sequence x."
+    "Return the skew aka third moment of sequence x."
     arr = np.array(x)
     arr = arr - arr.mean()
     arr = arr ** 3
@@ -130,7 +134,7 @@ def skew(x: Sequence) -> float:
 
 
 def kurtosis(x: Sequence, fisher: bool=True) -> float:
-    " Returns the kurtosis aka fourth moment of sequence x."
+    "Return the kurtosis aka fourth moment of sequence x."
     arr = np.array(x)
     arr = arr - arr.mean()
     arr = arr ** 4
@@ -139,9 +143,72 @@ def kurtosis(x: Sequence, fisher: bool=True) -> float:
 
 
 def zscore(x: Sequence) -> Sequence[float]:
-    " Returns an array with the values z-normalized"
+    "Return the z-score values of a sequence"
     arr = np.array(x)
     return (arr - arr.mean()) / arr.std(ddof=1)
+
+
+def r_zscore(x: Sequence, mu: float, sigma: float) -> Sequence[float]:
+    """
+    Transform z-score data to its original values
+
+    This transform requires the mean and standard deviation
+    of the original distribution to reconstruct
+    """
+    arr = np.array(x)
+    return (arr + mu) * sigma
+
+
+def mod_zscore(x: Sequence) -> Sequence[float]:
+    "Return the modified z-score values of a sequence"
+    arr = np.array(x)
+    mad = median_abs_dev(arr)
+    return .6745*(x - median(x)) / mad
+
+
+def mean_abs_diff(x: Sequence, ddof: int=1) -> float:
+    "Return the mean absolute difference"
+    arr = np.array(x)
+    arr = arr - arr.mean()
+    arr = np.abs(arr)
+    return np.sum(arr) / (arr.size - ddof)
+
+
+def median_abs_dev(x: Sequence) -> float:
+    "Return the median absolute deviation"
+    arr = np.array(x)
+    return median(np.abs(x - median(x)))
+
+
+def fisher_z(x: Sequence) -> Sequence:
+    "Fisher-z transform dataset"
+    arr = np.array(x)
+    # We have to scale to -1/1 for the transform but
+    # using -1/1 exactly will produce infs from log()
+    arr = minmax_scale(arr, -0.99999999, 0.99999999)
+    return  0.5 * np.log((1 + arr) / (1 - arr))
+
+
+def fisher_z_scalar(x: float) -> float:
+    "Fisher-z transform a scalar"
+    if x <= -1 or x >= 1:
+        raise ValueError("Scalar must be in open interval (-1,1)")
+    return 0.5 * np.log((1 + x) / (1 - x))
+
+
+def unity_scale(x: Sequence) -> Sequence:
+    "Scale dataset to between 0 and 1"
+    arr = np.array(x)
+    arr_min = arr.min()
+    arr_max = arr.max()
+    return (arr - arr_min) / (arr_max - arr_min)
+
+
+def minmax_scale(x: Sequence, n_min: float, n_max: float):
+    "scale dataset to arbitrary min/max"
+    arr = np.array(x)
+    unity_arr = unity_scale(arr)
+    return n_min + (n_max - n_min) * unity_arr
 
 
 # Aliases
