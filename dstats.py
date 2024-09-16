@@ -1,7 +1,12 @@
-" reimplementation of common stats functions"
+"""
+Implementation of some common statistics formulas
+"""
+
 from typing import Sequence, Union
 import numpy as np
 
+
+# 1. Measures of central tendancy
 
 def mean(x: Sequence) -> float:
     "Return the arithmetic mean of sequence x"
@@ -38,6 +43,8 @@ def mode(x: Sequence) -> list:
     mode_indices = np.where(counts == max_count)[0]
     return unique[mode_indices].tolist()
 
+
+# 2. Measures of dispersion
 
 def variance(x: Sequence, ddof=1) -> float:
     """
@@ -125,6 +132,8 @@ def corr(x: Sequence, y: Sequence) -> float:
     return (ut / lt).item()
 
 
+# 3. Measures of shape/symmetry
+
 def skew(x: Sequence) -> float:
     "Return the skew aka third moment of sequence x."
     arr = np.array(x)
@@ -141,6 +150,8 @@ def kurtosis(x: Sequence, fisher: bool=True) -> float:
     k = np.sum(arr) / (arr.size * std(x) ** 4)
     return k - 3.0 if fisher else k
 
+
+# 4. Transforms
 
 def zscore(x: Sequence) -> Sequence[float]:
     "Return the z-score values of a sequence"
@@ -180,7 +191,7 @@ def median_abs_dev(x: Sequence) -> float:
     return median(np.abs(x - median(x)))
 
 
-def fisher_z(x: Sequence) -> Sequence:
+def fisherz(x: Sequence) -> Sequence:
     "Fisher-z transform dataset"
     arr = np.array(x)
     # We have to scale to -1/1 for the transform but
@@ -189,7 +200,7 @@ def fisher_z(x: Sequence) -> Sequence:
     return  0.5 * np.log((1 + arr) / (1 - arr))
 
 
-def fisher_z_scalar(x: float) -> float:
+def fisherz_scalar(x: float) -> float:
     "Fisher-z transform a scalar"
     if x <= -1 or x >= 1:
         raise ValueError("Scalar must be in open interval (-1,1)")
@@ -209,6 +220,12 @@ def minmax_scale(x: Sequence, n_min: float, n_max: float):
     arr = np.array(x)
     unity_arr = unity_scale(arr)
     return n_min + (n_max - n_min) * unity_arr
+
+
+def moments(x: Sequence) -> Sequence:
+    "Return the first four statistical moments"
+    return [mean(x), variance(x), skew(x), kurtosis(x)]
+
 
 
 # Aliases
